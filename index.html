@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulado de Carreira</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: sério e encorajador, o tom de uma prova de residência bem diagramada
+   IDEA: o caderno de questões + a folha de respostas com bolinhas
+   PICTURE: a folha de gabarito que vai se preenchendo ao lado da questão
+   COLOUR and TYPE: papel gelo, tinta petróleo, âmbar só no carimbo; Fraunces + Inter
+   LAYOUT: capa → questão com gabarito ao lado → boletim com carimbo e gate */
+:root{color-scheme:light dark;
+--bg:light-dark(#e9eef0,#0d1519);--paper:light-dark(#fbfbf9,#16232a);--ink:light-dark(#101a21,#e8eef1);
+--soft:light-dark(#4f5d67,#9fb1ba);--line:light-dark(#d3dde1,#2a3b44);--pet:light-dark(#144a5a,#7cc4d6);
+--pet2:light-dark(#1d6a80,#7cc4d6);--mist:light-dark(#d9eaef,#1d3440);--amb:#e8a33d;--red:light-dark(#b3412f,#f08a76)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:300;line-height:1.08;text-wrap:balance;margin:0}
+h1 em,h2 em{font-style:italic}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px max(5vw,16px);background:var(--pet);color:var(--paper)}
+:root[data-theme=dark] .top,.top{color:light-dark(#f5f6f7,#0d1519)}
+.top b{font-weight:600}.top span{font-size:14px;opacity:.85}
+.timer{font-variant-numeric:tabular-nums;font-weight:600}
+main{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,48px) max(4vw,14px)}
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:6px;box-shadow:0 1px 0 var(--line),0 18px 40px -24px rgba(16,26,33,.35)}
+.hide{display:none!important}
+/* capa */
+.capa{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);overflow:hidden}
+.capa .l{padding:clamp(24px,4vw,52px)}
+.capa .r{background:var(--pet);color:light-dark(#f5f6f7,#0d1519);padding:clamp(24px,4vw,44px);display:flex;flex-direction:column;gap:16px;justify-content:center}
+.kick{font-size:14px;color:var(--soft);margin:0 0 14px}
+.capa h1{font-size:clamp(34px,5vw,52px);margin-bottom:16px}
+.capa ul{padding-left:18px;margin:16px 0 26px;color:var(--soft)}
+.capa li{margin:4px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 24px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:10px 16px;font:inherit;font-size:15px;cursor:pointer;min-height:44px}
+.chip[aria-pressed=true]{background:var(--pet);border-color:var(--pet);color:var(--paper)}
+.btn{background:var(--pet);color:var(--paper);border:0;border-radius:4px;padding:14px 22px;font:600 16px Inter,sans-serif;cursor:pointer;min-height:48px}
+.btn:disabled{opacity:.4;cursor:not-allowed}.btn.ghost{background:transparent;color:var(--pet);border:1px solid var(--line)}
+.btn:focus-visible,.chip:focus-visible,.opt:focus-visible,.bub:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+.mini{font-size:13px;color:var(--soft)}
+.big-bubbles{display:grid;grid-template-columns:repeat(4,34px);gap:10px 14px;margin:6px 0}
+.big-bubbles i{width:34px;height:34px;border-radius:50%;border:2px solid currentColor;opacity:.55}
+.big-bubbles i.f{background:currentColor;opacity:1}
+/* prova */
+.prova{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+.q{padding:clamp(22px,4vw,44px)}
+.qhead{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--soft);border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:22px}
+.pil{color:var(--pet2);font-weight:600}
+.q h2{font-size:clamp(24px,3vw,32px);margin-bottom:24px}
+.opt{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;background:transparent;border:1px solid var(--line);border-radius:4px;padding:14px 16px;margin-bottom:10px;font:inherit;color:var(--ink);cursor:pointer;min-height:52px}
+.opt:hover{border-color:var(--pet2)}
+.opt b{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--pet);display:grid;place-items:center;font-size:14px;color:var(--pet)}
+.opt[aria-checked=true]{border-color:var(--pet);background:var(--mist)}
+.opt[aria-checked=true] b{background:var(--pet);color:var(--paper)}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:22px;flex-wrap:wrap}
+.gab{padding:20px;position:sticky;top:16px}
+.gab h3{font-size:20px;margin-bottom:4px}
+.row{display:grid;grid-template-columns:28px repeat(4,1fr);align-items:center;gap:6px;padding:5px 6px;border-radius:4px;cursor:pointer}
+.row.cur{background:var(--mist)}
+.row span{font-size:13px;color:var(--soft);font-variant-numeric:tabular-nums}
+.bub{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--soft);display:grid;place-items:center;font-size:11px;color:var(--soft);justify-self:center;transition:background .25s}
+.bub.f{background:var(--pet);border-color:var(--pet);color:transparent}
+.prog{height:4px;background:var(--line);border-radius:2px;margin:12px 0 14px;overflow:hidden}.prog i{display:block;height:100%;background:var(--pet);transition:width .3s}
+/* resultado */
+.res{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.nota{padding:clamp(24px,4vw,44px);position:relative;overflow:hidden}
+.nota .n{font-family:Fraunces,serif;font-weight:300;font-size:clamp(84px,14vw,140px);line-height:.95;color:var(--pet);font-variant-numeric:tabular-nums}
+.nota .n small{font-size:.3em;color:var(--soft)}
+.stamp{position:absolute;right:clamp(14px,3vw,36px);top:clamp(28px,5vw,56px);border:3px solid var(--c,var(--amb));color:var(--c,var(--amb));padding:8px 14px;font:600 15px Inter,sans-serif;transform:rotate(-8deg);border-radius:4px;background:color-mix(in srgb,var(--paper) 80%,transparent)}
+.bars{margin-top:22px}
+.bar{display:grid;grid-template-columns:150px 1fr 44px;gap:10px;align-items:center;margin:9px 0;font-size:15px}
+.bar .t{height:10px;background:var(--line);border-radius:5px;overflow:hidden}.bar .t i{display:block;height:100%;background:var(--pet);border-radius:5px;transition:width .8s}
+.bar.w .t i{background:var(--amb)}
+.bar em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;color:var(--soft)}
+.insight{margin-top:20px;padding:14px 16px;border-left:3px solid var(--amb);background:var(--mist);border-radius:0 4px 4px 0}
+.gate{padding:clamp(24px,4vw,40px)}
+.gate h2{font-size:clamp(26px,3vw,34px);margin-bottom:8px}
+label{display:block;font-size:14px;font-weight:500;margin:14px 0 6px}
+input,select{width:100%;font:16px Inter,sans-serif;padding:12px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);min-height:46px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 12px}
+.ck{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:14px;color:var(--soft)}
+.ck input{width:20px;min-height:20px;margin-top:2px;flex:none}
+.locked{filter:blur(5px);user-select:none;pointer-events:none}
+.esp{margin-top:24px;padding:clamp(22px,4vw,40px)}
+.esp h2{font-size:28px;margin-bottom:12px}
+.ei{border-top:1px solid var(--line);padding:16px 0}
+.ei p{margin:6px 0}.ok{color:var(--pet2);font-weight:600}.no{color:var(--red);font-weight:600}
+details{margin-top:16px;font-size:14px;color:var(--soft)}pre{overflow-x:auto;background:var(--mist);padding:12px;border-radius:4px;font-size:13px}
+@media(max-width:860px){.prova{grid-template-columns:minmax(0,1fr)}.gab{position:static}.res,.capa{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.bar{grid-template-columns:110px 1fr 40px;font-size:14px}.two{grid-template-columns:minmax(0,1fr)}.stamp{position:static;display:inline-block;margin-top:12px}.capa .r{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><span><b>Consulthree Jovens</b> · Simulado de Residência: Carreira</span><span class="timer" id="timer" aria-live="off"></span></header>
+<main>
+
+<section id="s-capa" class="sheet capa">
+  <div class="l">
+    <p class="kick">Caderno de questões · versão 2027</p>
+    <h1>A prova que a faculdade <em>não</em> aplica</h1>
+    <p>8 questões sobre o que decide a sua carreira fora do plantão: dinheiro, mercado, posicionamento e gestão. No fim, você recebe a sua nota e o boletim por área.</p>
+    <ul><li>Cerca de 3 minutos</li><li>Uma alternativa por questão</li><li>Sem pegadinha: responda o que você faria de verdade</li></ul>
+    <p style="margin:0;font-weight:500">Em que momento você está?</p>
+    <div class="chips" id="moment" role="radiogroup" aria-label="Momento da carreira"></div>
+    <button class="btn" id="start" disabled>Abrir o caderno</button>
+    <p class="mini" style="margin-top:14px">Protótipo: perguntas e textos para validar com a equipe.</p>
+  </div>
+  <div class="r" aria-hidden="true">
+    <p style="margin:0;font-size:14px;opacity:.85">Folha de respostas</p>
+    <div class="big-bubbles" id="deco"></div>
+    <p style="margin:0;font-family:Fraunces,serif;font-size:22px;font-weight:300">Preencha com caneta preta. Ou com o dedo.</p>
+  </div>
+</section>
+
+<section id="s-prova" class="prova hide">
+  <article class="sheet q" aria-live="polite">
+    <div class="qhead"><span id="qn"></span><span class="pil" id="qp"></span></div>
+    <h2 id="qt"></h2>
+    <div id="opts" role="radiogroup"></div>
+    <div class="nav"><button class="btn ghost" id="prev">Anterior</button><button class="btn" id="next">Próxima</button></div>
+  </article>
+  <aside class="sheet gab">
+    <h3>Folha de respostas</h3>
+    <div class="prog"><i id="pg" style="width:0"></i></div>
+    <div id="rows"></div>
+    <button class="btn" id="deliver" style="width:100%;margin-top:14px" disabled>Entregar prova</button>
+  </aside>
+</section>
+
+<section id="s-res" class="hide">
+  <div class="res">
+    <article class="sheet nota">
+      <p class="kick">Sua nota</p>
+      <div class="n" id="nota"></div>
+      <div class="stamp" id="stamp"></div>
+      <div class="bars" id="bars"></div>
+      <div class="insight" id="insight"></div>
+    </article>
+    <article class="sheet gate" id="gate">
+      <h2>Receba o <em>espelho comentado</em></h2>
+      <p style="color:var(--soft);margin:0">Questão por questão: o que você marcou, a resposta mais forte e por quê. Mais um plano de estudo para o seu pilar mais fraco.</p>
+      <form id="form" novalidate>
+        <label for="f-nome">Nome</label><input id="f-nome" autocomplete="name" required>
+        <div class="two">
+          <div><label for="f-wa">WhatsApp com DDD</label><input id="f-wa" inputmode="tel" autocomplete="tel" placeholder="(11) 99999-9999" required></div>
+          <div><label for="f-mail">E-mail</label><input id="f-mail" type="email" autocomplete="email" required></div>
+        </div>
+        <div class="two">
+          <div><label for="f-inst">Faculdade ou instituição</label><input id="f-inst"></div>
+          <div><label for="f-esp">Especialidade de interesse</label><input id="f-esp" placeholder="Ainda não sei"></div>
+        </div>
+        <label class="ck"><input type="checkbox" id="f-ok" required> Aceito receber o espelho e conteúdos da Consulthree por e-mail e WhatsApp.</label>
+        <p class="mini no hide" id="err" role="alert">Preencha nome, WhatsApp, e-mail e o aceite.</p>
+        <button class="btn" style="width:100%;margin-top:16px">Liberar meu espelho</button>
+      </form>
+    </article>
+  </div>
+  <article class="sheet esp locked" id="esp" aria-hidden="true"></article>
+</section>
+</main>
+
+<script>
+{
+const P={fin:'Finanças',mer:'Mercado e carreira',pos:'Posicionamento',ges:'Gestão'};
+const PLAN={fin:'organizar impostos, reserva e a diferença entre bruto e líquido',mer:'cruzar afinidade com demanda e desenhar onde quer estar em 5 anos',pos:'construir presença digital ética e uma rede de contatos ativa',ges:'entender custos, preço da consulta e como ler um contrato'};
+const Q=[
+{p:'fin',t:'Primeiro mês de plantões como PJ: o dinheiro caiu na conta. O que você faz primeiro?',o:[['Pago as contas do mês e vejo o que sobra.',1],['Separo os impostos e começo uma reserva antes de gastar.',3],['Aplico tudo numa oportunidade que um colega indicou.',0],['Deixo parado e resolvo depois com o contador.',2]],c:'Como PJ, o imposto não vem descontado. Separar na hora evita a surpresa do mês seguinte, e a reserva segura os meses de escala fraca.'},
+{p:'fin',t:'Um hospital oferece contratar você como PJ. Antes de aceitar, o que você compara?',o:[['Só o valor bruto do plantão.',0],['O valor líquido, depois de impostos e do custo de manter o CNPJ.',3],['Se os colegas também aceitaram.',1],['Se dá para receber como pessoa física.',1]],c:'O valor bruto engana. Impostos, contador e taxas mudam bastante o que sobra no fim do mês.'},
+{p:'mer',t:'Como você está escolhendo (ou escolheu) a sua especialidade?',o:[['Pela que paga mais hoje.',1],['Pela indicação da família ou de professores.',0],['Pelo que gosto na prática, cruzado com a demanda de onde quero viver.',3],['Vou decidir quando chegar a hora.',0]],c:'Afinidade sem mercado vira frustração; mercado sem afinidade vira desgaste. A escolha boa cruza os dois.'},
+{p:'mer',t:'Daqui a 5 anos, você sabe onde quer atender e para quem?',o:[['Sim: cidade, perfil de paciente e modelo (consultório, hospital ou misto).',3],['Tenho uma ideia geral.',2],['Vou para onde aparecer oportunidade.',1],['Nunca parei para pensar.',0]],c:'Quem define o destino escolhe os plantões, os cursos e a rede de contatos que levam até lá.'},
+{p:'pos',t:'Se um paciente procurar o seu nome no Google ou no Instagram hoje, ele encontra:',o:[['Nada, ou só o meu perfil pessoal.',0],['Meu nome e a especialidade, sem muito mais.',1],['Conteúdo, mas sem uma linha clara.',2],['Quem eu sou, o que eu trato e como agendar.',3]],c:'A primeira consulta começa na busca. Um perfil claro, dentro das regras do CFM, gera confiança antes do primeiro contato.'},
+{p:'pos',t:'Como você constrói a sua rede de contatos na medicina?',o:[['Conheço quem aparece no plantão e na faculdade.',1],['Cuido de forma ativa: preceptores, colegas de outras especialidades, eventos.',3],['Só pelas redes sociais.',1],['Ainda não penso nisso.',0]],c:'Boa parte dos primeiros pacientes e convites chega por indicação de colegas. Rede se planta antes de precisar.'},
+{p:'ges',t:'No seu primeiro consultório, o que define se ele dá lucro?',o:[['Ter muitos pacientes.',1],['Aceitar todos os convênios.',0],['Conhecer o custo fixo, o valor médio da consulta e a taxa de faltas.',3],['Ter uma boa secretária.',1]],c:'Agenda cheia pode dar prejuízo. Sem saber o custo fixo e quanto cada consulta deixa, não dá para decidir preço nem convênio.'},
+{p:'ges',t:'Na hora de assinar contrato com uma clínica ou hospital, você:',o:[['Confio na indicação e assino.',0],['Leio por cima.',1],['Peço para alguém revisar, mas não negocio.',2],['Leio tudo e negocio repasse, prazos e exclusividade.',3]],c:'Repasse, prazo de pagamento e exclusividade definem anos da sua carreira. Contrato também se negocia.'}];
+const M=['Estudante','Internato','Residente','Recém-especialista'];
+const L='ABCD',$=id=>document.getElementById(id);
+let mom=null,cur=0,ans=Array(Q.length).fill(null),t0=0,tick=null;
+
+$('moment').innerHTML=M.map(m=>`<button class="chip" role="radio" aria-pressed="false" data-m="${m}">${m}</button>`).join('');
+$('deco').innerHTML=Array.from({length:24},(_,i)=>`<i class="${[1,4,10,15,17,22].includes(i)?'f':''}"></i>`).join('');
+$('moment').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;mom=b.dataset.m;
+  [...$('moment').children].forEach(c=>c.setAttribute('aria-pressed',c===b));$('start').disabled=false});
+
+const show=id=>{['s-capa','s-prova','s-res'].forEach(s=>$(s).classList.toggle('hide',s!==id));scrollTo(0,0)};
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+
+$('start').onclick=()=>{show('s-prova');t0=Date.now();tick=setInterval(()=>$('timer').textContent='Tempo '+fmt(Math.floor((Date.now()-t0)/1000)),1000);render()};
+
+function render(){
+  const q=Q[cur];
+  $('qn').textContent=`Questão ${cur+1} de ${Q.length}`;$('qp').textContent=P[q.p];$('qt').textContent=q.t;
+  $('opts').innerHTML=q.o.map((o,i)=>`<button class="opt" role="radio" aria-checked="${ans[cur]===i}" data-i="${i}"><b>${L[i]}</b><span>${o[0]}</span></button>`).join('');
+  $('rows').innerHTML=Q.map((_,r)=>`<div class="row ${r===cur?'cur':''}" data-r="${r}"><span>${String(r+1).padStart(2,'0')}</span>${[0,1,2,3].map(i=>`<i class="bub ${ans[r]===i?'f':''}">${L[i]}</i>`).join('')}</div>`).join('');
+  const done=ans.filter(a=>a!==null).length;
+  $('pg').style.width=done/Q.length*100+'%';
+  $('prev').disabled=cur===0;
+  $('next').textContent=cur===Q.length-1?'Revisar folha':'Próxima';
+  $('next').disabled=ans[cur]===null;
+  $('deliver').disabled=done<Q.length;
+}
+$('opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;ans[cur]=+b.dataset.i;render();
+  if(cur<Q.length-1)setTimeout(()=>{cur++;render()},380)});
+$('rows').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;cur=+r.dataset.r;render()});
+$('prev').onclick=()=>{if(cur>0){cur--;render()}};
+$('next').onclick=()=>{if(cur<Q.length-1){cur++;render()}else $('deliver').focus()};
+
+let result=null;
+$('deliver').onclick=()=>{
+  clearInterval(tick);
+  const by={fin:0,mer:0,pos:0,ges:0};let tot=0;
+  Q.forEach((q,i)=>{const v=q.o[ans[i]][1];by[q.p]+=v;tot+=v});
+  const nota=Math.round(tot/24*100)/10;
+  const weak=Object.keys(by).sort((a,b)=>by[a]-by[b])[0];
+  result={nota,by,weak,tempo:fmt(Math.floor((Date.now()-t0)/1000))};
+  $('timer').textContent='Prova entregue em '+result.tempo;
+  $('nota').innerHTML=nota.toFixed(1).replace('.',',')+'<small> / 10</small>';
+  const st=nota>=7?['Aprovado(a)','var(--pet2)']:nota>=4?['Lista de espera','var(--amb)']:['Ainda não','var(--red)'];
+  $('stamp').textContent=st[0];$('stamp').style.setProperty('--c',st[1]);
+  $('bars').innerHTML=Object.keys(P).map(k=>`<div class="bar ${k===weak?'w':''}"><span>${P[k]}</span><div class="t"><i style="width:0" data-w="${by[k]/6*100}"></i></div><em>${(by[k]/6*10).toFixed(1).replace('.',',')}</em></div>`).join('');
+  $('insight').innerHTML=`<b>Seu ponto de atenção: ${P[weak]}.</b> É aqui que um jovem médico costuma perder mais tempo e dinheiro. O espelho mostra como ${PLAN[weak]}.`;
+  $('esp').innerHTML=espelho();
+  show('s-res');
+  requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('.bar .t i').forEach(i=>i.style.width=i.dataset.w+'%'),60));
+};
+function espelho(){
+  return `<h2>Espelho <em>comentado</em></h2>`+Q.map((q,i)=>{
+    const best=q.o.findIndex(o=>o[1]===3),mine=ans[i];
+    return `<div class="ei"><p class="mini">Questão ${i+1} · ${P[q.p]}</p><p><b>${q.t}</b></p>
+    <p>Você marcou <b>${L[mine]}</b>: ${q.o[mine][0]} ${mine===best?'<span class="ok">Resposta mais forte.</span>':`<span class="no">Mais forte: ${L[best]}.</span>`}</p><p style="color:var(--soft)">${q.c}</p></div>`}).join('')+
+    `<details><summary>Dados que iriam para o CRM (protótipo)</summary><pre id="json"></pre></details>`;
+}
+$('form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const v=id=>$(id).value.trim();
+  const ok=v('f-nome')&&v('f-wa').replace(/\D/g,'').length>=10&&/\S+@\S+\.\S+/.test(v('f-mail'))&&$('f-ok').checked;
+  $('err').classList.toggle('hide',!!ok);if(!ok)return;
+  const lead={origem:'simulado-carreira',momento:mom,nome:v('f-nome'),whatsapp:v('f-wa'),email:v('f-mail'),instituicao:v('f-inst'),especialidade:v('f-esp'),nota:result.nota,pilares:result.by,pilar_fraco:result.weak,tempo:result.tempo,ref:location.hash.slice(1)||null};
+  $('gate').innerHTML=`<h2>Pronto, ${lead.nome.split(' ')[0].replace(/[<>&"']/g,'')}.</h2><p>Seu espelho está liberado logo abaixo. A equipe da Consulthree Jovens vai te chamar no WhatsApp para conversar sobre o seu plano.</p><p class="mini">Protótipo: nada foi enviado. Em produção, estes dados seguem para o CRM.</p>`;
+  const esp=$('esp');esp.classList.remove('locked');esp.removeAttribute('aria-hidden');
+  $('json').textContent=JSON.stringify(lead,null,2);
+  esp.scrollIntoView({behavior:'smooth'});
+});
+}
+</script>
+</body>
+</html>
